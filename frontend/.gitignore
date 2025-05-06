@@ -21,3 +21,12 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Default React files
+/public/logo192.png
+/public/logo512.png
+/src/logo.svg
+/src/App.test.js
+/src/setupTests.js
+/src/App.css
+/src/index.css
