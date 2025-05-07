@@ -1,52 +1,44 @@
-const mysql = require("mysql2/promise");
-const dbConfig = require("../config/db.config.js");
+const config = require("../config/db.config.js");
+const Sequelize = require("sequelize");
 
-// Create a connection pool to the database
-const pool = mysql.createPool({
-  host: dbConfig.HOST,
-  user: dbConfig.USER,
-  password: dbConfig.PASSWORD,
-  database: dbConfig.DB,
-  waitForConnections: true,
-  connectionLimit: dbConfig.pool.max,
-  queueLimit: 0
-});
-
-// Test the connection
-pool.getConnection()
-  .then(connection => {
-    console.log("Successfully connected to the database.");
-    connection.release();
-  })
-  .catch(err => {
-    console.error("Database connection error:", err);
-    process.exit(1);
-  });
-
-module.exports = {
-  pool,
-  query: async (sql, params) => {
-    try {
-      const [results] = await pool.execute(sql, params);
-      return results;
-    } catch (error) {
-      console.error("Query error:", error);
-      throw error;
-    }
-  },
-  transaction: async (callback) => {
-    const connection = await pool.getConnection();
-    await connection.beginTransaction();
-    
-    try {
-      const result = await callback(connection);
-      await connection.commit();
-      return result;
-    } catch (error) {
-      await connection.rollback();
-      throw error;
-    } finally {
-      connection.release();
+const sequelize = new Sequelize(
+  config.DB,
+  config.USER,
+  config.PASSWORD,
+  {
+    host: config.HOST,
+    dialect: config.dialect,
+    pool: {
+      max: config.pool.max,
+      min: config.pool.min,
+      acquire: config.pool.acquire,
+      idle: config.pool.idle
     }
   }
-};
+);
+
+const db = {};
+
+db.Sequelize = Sequelize;
+db.sequelize = sequelize;
+
+db.user = require("./user.model.js")(sequelize, Sequelize);
+db.activity = require("./activity.model.js")(sequelize, Sequelize);
+db.emissionLog = require("./emissionLog.model.js")(sequelize, Sequelize);
+db.category = require("./category.model.js")(sequelize, Sequelize);
+
+// Define relationships
+db.user.hasMany(db.emissionLog, { foreignKey: 'UserID' });
+db.emissionLog.belongsTo(db.user, { foreignKey: 'UserID' });
+
+db.activity.hasMany(db.emissionLog, { foreignKey: 'ActivityID' });
+db.emissionLog.belongsTo(db.activity, { foreignKey: 'ActivityID', as: 'activity' });
+
+// Call associate functions
+Object.keys(db).forEach(modelName => {
+  if (db[modelName].associate) {
+    db[modelName].associate(db);
+  }
+});
+
+module.exports = db;
