@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../App.css";
 
-const API_URL = "http://localhost:5000/api/auth";
+const API_URL = "http://localhost:8080/api/auth";
 
 const LoginPage = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -21,16 +21,16 @@ const LoginPage = () => {
     try {
       if (isLogin) {
         // Login
-        const res = await axios.post(`${API_URL}/login`, {
+        const res = await axios.post(`${API_URL}/signin`, {
           email: form.email,
           password: form.password,
         });
-        localStorage.setItem("token", res.data.token);
-        localStorage.setItem("user", JSON.stringify(res.data.user));
+        localStorage.setItem("token", res.data.accessToken);
+        localStorage.setItem("user", JSON.stringify(res.data));
         navigate("/dashboard");
       } else {
         // Register
-        const res = await axios.post(`${API_URL}/register`, {
+        const res = await axios.post(`${API_URL}/signup`, {
           name: form.username,
           email: form.email,
           password: form.password,

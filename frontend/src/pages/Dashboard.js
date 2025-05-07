@@ -15,7 +15,7 @@ import {
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
-const API_URL = "http://localhost:5000";
+const API_URL = "http://localhost:8080";
 
 const categoryIcons = {
   Transportation: "🚗",
@@ -45,14 +45,18 @@ const Dashboard = () => {
       setLoading(true);
       try {
         const token = localStorage.getItem("token");
-        const dashRes = await axios.get(`${API_URL}/api/dashboard/summary`, {
+        // Get emissions summary
+        const emissionsRes = await axios.get(`${API_URL}/api/emissions/summary`, {
           headers: { Authorization: `Bearer ${token}` },
+          params: { days: range }
         });
-        setSummary(dashRes.data);
-        const recRes = await axios.get(`${API_URL}/api/recommendations`, {
-          headers: { Authorization: `Bearer ${token}` },
+        setSummary(emissionsRes.data);
+
+        // Get recommendations
+        const recRes = await axios.get(`${API_URL}/api/emissions/recommendations`, {
+          headers: { Authorization: `Bearer ${token}` }
         });
-        setRecommendations(recRes.data.recommendations || []);
+        setRecommendations(recRes.data || []);
       } catch (err) {
         if (err.response && err.response.status === 401) {
           localStorage.clear();
@@ -72,7 +76,7 @@ const Dashboard = () => {
   // Prepare chart data
   const chartData = summary?.emissionsOverTime || [];
   const lineData = {
-    labels: chartData.map((d) => d.day),
+    labels: chartData.map((d) => d.date),
     datasets: [
       {
         label: "Emissions (kg CO2)",
@@ -89,7 +93,9 @@ const Dashboard = () => {
     <div style={{ background: "#f6f6f6", minHeight: "100vh" }}>
       {/* Nav Bar */}
       <div style={{ background: "#fff", borderBottom: "1px solid #e0e0e0", padding: "0 32px", display: "flex", alignItems: "center", height: 64 }}>
-        <div style={{ fontWeight: 700, fontSize: 28, color: "#388e3c", marginRight: 40 }}>EcoTrack</div>
+        <div style={{ fontWeight: 700, fontSize: 28, color: "#388e3c", marginRight: 40 }}>
+          <span role="img" aria-label="leaf">🍃</span> EcoTrack
+        </div>
         <div style={{ display: "flex", flex: 1, justifyContent: "center", gap: 32 }}>
           <NavLink label="Dashboard" active />
           <NavLink label="Log Activity" onClick={() => navigate("/log-activity")} />
@@ -102,14 +108,34 @@ const Dashboard = () => {
         <div style={{ fontSize: 32, fontWeight: 700, marginBottom: 32 }}>Your Carbon Dashboard</div>
         {/* Top Cards */}
         <div style={{ display: "flex", gap: 32, marginBottom: 32 }}>
-          <StatCard icon="🌍" title="Weekly Emissions" value={summary?.weeklyEmissions || 0} unit="kg CO2" subtitle="48% from last week" positive={false} />
-          <StatCard icon="📊" title="Monthly Average" value={summary?.monthlyAverage || 0} unit="kg CO2" subtitle="3% of target" positive={true} />
+          <StatCard 
+            icon="🌍" 
+            title="Weekly Emissions" 
+            value={summary?.weeklyEmissions ? summary.weeklyEmissions.toLocaleString(undefined, {maximumFractionDigits: 2}) : 0} 
+            unit="kg CO2" 
+            subtitle="Track your carbon output compared to last week."
+            positive={summary?.percentChange <= 0}
+          />
+          <StatCard 
+            icon="📊" 
+            title="Monthly Average" 
+            value={summary?.monthlyAverage ? summary.monthlyAverage.toLocaleString(undefined, {maximumFractionDigits: 2}) : 0} 
+            unit="kg CO2" 
+            subtitle="Monitor your average emissions to stay on target."
+            positive={summary?.percentOfTarget <= 100}
+          />
           <StatCard 
             icon="🌳" 
             title="CO2 Saved" 
             value={summary?.co2Saved || 0} 
             unit="kg CO2" 
-            subtitle={`Equivalent to ${Math.floor((summary?.co2Saved || 0) / 21.77)} trees planted`} 
+            subtitle={(() => {
+              let divisor = 0.4;
+              if (range === 30) divisor = 1.75;
+              if (range === 90) divisor = 5.25;
+              const trees = summary?.co2Saved ? (summary.co2Saved / divisor) : 0;
+              return `That's like planting ${Math.round(trees)} tree${Math.round(trees) === 1 ? '' : 's'} — keep it up!`;
+            })()}
             positive={true} 
           />
         </div>
@@ -197,7 +223,7 @@ function StatCard({ icon, title, value, unit, subtitle, positive }) {
       <div style={{ fontSize: 38, marginBottom: 8 }}>{icon}</div>
       <div style={{ fontWeight: 600, fontSize: 20, marginBottom: 6 }}>{title}</div>
       <div style={{ fontSize: 32, fontWeight: 700, marginBottom: 6 }}>{value} {unit}</div>
-      <div style={{ color: positive ? "#388e3c" : "#c62828", fontWeight: 500, fontSize: 16 }}>{subtitle}</div>
+      <div style={{ color: positive ? "#388e3c" : "#c62828", fontWeight: 500, fontSize: 16, textAlign: 'center' }}>{subtitle}</div>
     </div>
   );
 }

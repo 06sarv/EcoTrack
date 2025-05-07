@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const API_URL = "http://localhost:5000";
+const API_URL = "http://localhost:8080";
 const categories = ["Transportation", "Food", "Energy"];
 
 // Hardcoded options for each category
@@ -28,6 +28,7 @@ const LogActivity = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState("Transportation");
+  const [activities, setActivities] = useState([]);
   const [form, setForm] = useState({
     activityId: "",
     quantity: "",
@@ -53,7 +54,20 @@ const LogActivity = () => {
       return;
     }
     setUser(JSON.parse(userData));
+    fetchActivities();
   }, [navigate]);
+
+  const fetchActivities = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(`${API_URL}/api/activities`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setActivities(response.data);
+    } catch (err) {
+      setError("Failed to fetch activities. Please try again.");
+    }
+  };
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -86,9 +100,9 @@ const LogActivity = () => {
     try {
       const token = localStorage.getItem("token");
       await axios.post(
-        `${API_URL}/api/activity/log`,
+        `${API_URL}/api/emissions/log`,
         {
-          activityId: form.activityId, // This is now the activity type string
+          activityId: parseInt(form.activityId),
           quantity: parseFloat(form.quantity),
           date: form.date,
           notes: form.notes,
@@ -125,11 +139,16 @@ const LogActivity = () => {
     }
   };
 
+  // Filter activities by category
+  const filteredActivities = activities.filter(
+    activity => activity.category && activity.category.CategoryName === activeTab
+  );
+
   return (
     <div style={{ background: "#f6f6f6", minHeight: "100vh" }}>
       {/* Nav Bar */}
       <div style={{ background: "#fff", borderBottom: "1px solid #e0e0e0", padding: "0 32px", display: "flex", alignItems: "center", height: 64 }}>
-        <div style={{ fontWeight: 700, fontSize: 28, color: "#388e3c", marginRight: 40, cursor: "pointer" }} onClick={() => navigate("/dashboard")}>EcoTrack</div>
+        <div style={{ fontWeight: 700, fontSize: 28, color: "#388e3c", marginRight: 40, cursor: "pointer" }} onClick={() => navigate("/dashboard")}>🍃 EcoTrack</div>
         <div style={{ display: "flex", flex: 1, justifyContent: "center", gap: 32 }}>
           <NavLink label="Dashboard" onClick={() => navigate("/dashboard")} />
           <NavLink label="Log Activity" active />
@@ -189,8 +208,10 @@ const LogActivity = () => {
                 required
               >
                 <option value="">Select type</option>
-                {categoryOptions[activeTab].types.map((type) => (
-                  <option key={type} value={type}>{type}</option>
+                {filteredActivities.map((activity) => (
+                  <option key={activity.ActivityID} value={activity.ActivityID}>
+                    {activity.ActivityType}
+                  </option>
                 ))}
               </select>
             </div>
