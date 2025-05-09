@@ -12,7 +12,7 @@ EcoTrack helps you understand and reduce your carbon footprint by tracking your 
 ## Screenshots 📸
 
 ### 🚪 Login & Register Page
-![Login and Register Page](frontend/public/screenshots/Login:RegisterPage.png)
+![Login and Register Page](frontend/public/screenshots/RegisterPage.png)
 
 ---
 
