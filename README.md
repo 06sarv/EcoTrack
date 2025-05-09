@@ -60,7 +60,7 @@ ecotrack/
    DB_PASSWORD=your_password
    DB_NAME=ecotrack
    JWT_SECRET=your_jwt_secret
-   PORT=5000
+   PORT=8080
    ```
 
 4. Initialize the database:
