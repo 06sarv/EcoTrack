@@ -93,7 +93,7 @@ ecotrack/
    DB_PASSWORD=your_password
    DB_NAME=ecotrack
    JWT_SECRET=your_jwt_secret
-   PORT=5000
+   PORT=8080
    ```
 
 4. Initialize the database:
@@ -118,12 +118,7 @@ ecotrack/
    npm install
    ```
 
-3. Create a `.env` file:
-   ```
-   REACT_APP_API_URL=http://localhost:5000
-   ```
-
-4. Start the development server:
+3. Start the development server:
    ```bash
    npm start
    ```
