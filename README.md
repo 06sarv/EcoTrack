@@ -1,6 +1,39 @@
-# EcoTrack - Carbon Footprint Tracking Application
+# EcoTrack - Carbon Footprint Tracking Application 🌱
 
-EcoTrack is a full-stack web application designed to help users track and reduce their carbon footprint. The application provides features for logging daily activities, setting sustainability goals, and receiving personalized recommendations for reducing environmental impact.
+EcoTrack helps you understand and reduce your carbon footprint by tracking your daily activities. Get personalized insights and recommendations to make sustainable choices! 🌍
+
+## Features ✨
+- Track daily activities: transportation, food, and energy use
+- Visualize your carbon impact with dashboards and charts
+- Get smart, actionable recommendations
+
+---
+
+## Screenshots 📸
+
+### 🚪 Login & Register Page
+![Login and Register Page](frontend/public/screenshots/Login:RegisterPage.png)
+
+---
+
+### 📊 Dashboard
+![Dashboard](frontend/public/screenshots/Dasboard.png)
+
+---
+
+### 🍽️ Log Activity (Food Example)
+![Log Activity - Food](frontend/public/screenshots/ActivityLog.png)
+
+---
+
+## Get Started 🚀
+1. Clone the repo
+2. Install dependencies
+3. Run the app
+
+---
+
+Contribute to a greener planet with EcoTrack! 🌳
 
 ## Project Structure
 
