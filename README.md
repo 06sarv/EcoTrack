@@ -85,12 +85,7 @@ ecotrack/
    npm install
    ```
 
-3. Create a `.env` file:
-   ```
-   REACT_APP_API_URL=http://localhost:5000
-   ```
-
-4. Start the development server:
+3. Start the development server:
    ```bash
    npm start
    ```
